@@ -19,6 +19,11 @@ python -m unittest discover -s tests -v
 - `[缺页]`、`[不可辨]`、`[残损]` 等标记会参与校勘稿导出和缺口统计，不匹配的方括号会拒绝保存。
 - 每次新增或修改异文都会产生递增修订号和 JSON 快照；提交必须携带 `expected_revision`，旧页面不能覆盖新层。
 - 锁定段落由负责人执行，锁定后任何新修订都会被拒绝。
+- 异文审定：拥有作品 `review` 权限的用户（或负责人）可核准（`approved`）或驳回（`rejected`）并必须留下意见；同一异文只保留最新结论。
+- 审定提交必须携带当前段落修订号 `expected_revision`，旧页面晚到的操作会收到"内容已更新"提示。
+- 异文一旦产生新修订层，原审定结论自动失效，状态回到待审定（`pending`），需重新审定。
+- 编辑不能审定自己创建的异文，负责人例外。
+- 导出校勘稿为每条异文附带 `review_status`（`pending`/`approved`/`rejected`）及 `review`（审阅人、意见、对应修订号、时间）。
 
 ## 主要接口
 
@@ -27,8 +32,9 @@ python -m unittest discover -s tests -v
 - `POST /api/works/{id}/passages`、`POST /api/works/{id}/access`
 - `POST /api/alignments`
 - `POST /api/variants`、`POST /api/variants/{id}/revisions`
+- `POST /api/variants/{id}/reviews`：`{decision, comment, user_id, expected_revision}`
 - `GET /api/passages/{id}/snapshots/{revision}?user_id=...`
 - `POST /api/passages/{id}/lock`
 - `GET /api/works/{id}/collation?user_id=...`
 
-导出接口把版本对齐、异文、注释、残损缺口和锁定状态组合成可复核的校勘稿。
+导出接口把版本对齐、异文（含审定状态、审阅人及意见）、注释、残损缺口和锁定状态组合成可复核的校勘稿。
